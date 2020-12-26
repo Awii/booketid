@@ -20,7 +20,47 @@
     </v-toolbar>
 
     <v-main>
-      <v-container :style="{ 'max-width': maxWidth }"> </v-container>
+      <v-container :style="{ 'max-width': maxWidth }" class="mt-4">
+        <v-stepper v-model="stepper" alt-labels>
+          <v-stepper-header>
+            <template v-for="(step, index) in steps">
+              <v-stepper-step
+                :key="index"
+                :complete="stepper > index + 1"
+                :step="index + 1"
+              >
+                {{ step }}
+              </v-stepper-step>
+              <v-divider
+                :key="step"
+                v-if="index !== steps.length - 1"
+              ></v-divider>
+            </template>
+          </v-stepper-header>
+
+          <v-stepper-items>
+            <template v-for="(step, index) in steps">
+              <v-stepper-content :key="index" :step="index + 1">
+                <v-card
+                  class="mb-12"
+                  color="grey lighten-1"
+                  height="200px"
+                ></v-card>
+                <v-btn
+                  color="primary"
+                  @click="
+                    index == steps.length - 1
+                      ? (stepper = index - 2)
+                      : (stepper = index + 2)
+                  "
+                >
+                  Continue
+                </v-btn>
+              </v-stepper-content>
+            </template>
+          </v-stepper-items>
+        </v-stepper>
+      </v-container>
     </v-main>
   </div>
 </template>
@@ -32,7 +72,9 @@ export default {
   data() {
     return {
       title: "Site",
-      maxWidth: "550px"
+      maxWidth: "550px",
+      stepper: 1,
+      steps: ["Tjeneste", "Tidspunkt", "Personalia", "Bekreftelse"]
     };
   },
 
