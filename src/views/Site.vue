@@ -25,7 +25,11 @@
           <v-stepper-header>
             <template v-for="(step, index) in steps">
               <v-stepper-step
+<<<<<<< HEAD
                 :key="index"
+=======
+                :key="step"
+>>>>>>> 2d5645ba8baa36c1c904ae0ecc75744cb3101b5d
                 :complete="stepper > index + 1"
                 :step="index + 1"
               >
