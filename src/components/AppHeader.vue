@@ -16,8 +16,12 @@
 
 <script>
 export default {
-  name: "NavBar",
-  props: ["title", "logo", "maxWidth"]
+  name: "AppHeader",
+  props: {
+    title: String,
+    logo: String,
+    maxWidth: String
+  }
 };
 </script>
 

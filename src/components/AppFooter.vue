@@ -14,7 +14,7 @@
                 small
                 dense
               ></v-icon>
-              <div class="text-body-2 ml-2">{{ kontakt.nr }}</div>
+              <span class="text-body-2 ml-2">{{ contact.number }}</span>
             </div>
             <div class="d-flex flex-row align-center">
               <v-icon
@@ -24,7 +24,7 @@
                 small
                 dense
               ></v-icon>
-              <div class="text-body-2 ml-2">{{ kontakt.epost }}</div>
+              <span class="text-body-2 ml-2">{{ contact.email }}</span>
             </div>
           </div>
         </v-col>
@@ -42,7 +42,7 @@
                 dense
               ></v-icon>
               <div class="text-body-2 ml-2 d-flex flex-column">
-                <div v-for="a in adresse" :key="a">{{ a }}</div>
+                <span v-for="a in address" :key="a">{{ a }}</span>
               </div>
             </div>
           </div>
@@ -87,8 +87,8 @@
 
 <script>
 export default {
-  name: "Footer",
-  props: ["kontakt", "adresse"]
+  name: "AppFooter",
+  props: { contact: Object, address: Array }
 };
 </script>
 
