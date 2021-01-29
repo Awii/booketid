@@ -3,9 +3,14 @@
     <AppHeader :title="title" :logo="logo" :maxWidth="maxWidth" />
 
     <v-main>
-      <AppStepper :steps="steps" :services="services" :maxWidth="maxWidth" />
+      <AppStepper
+        :steps="steps"
+        :services="services"
+        :maxWidth="maxWidth"
+        :location="location"
+      />
     </v-main>
-    <AppFooter :contact="contact" :address="address" />
+    <AppFooter :contact="contact" :location="location" />
   </div>
 </template>
 
@@ -31,7 +36,7 @@ export default {
 
       // footer props
       contact: { number: "+47 900 45 100", email: "placeholder@email.com" },
-      address: ["Stenersgata 1 E", "0050 Oslo"],
+      location: ["Stenersgata 1 E", "0050 Oslo"],
 
       // stepper props
       services: [],

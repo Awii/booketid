@@ -42,7 +42,7 @@
                 dense
               ></v-icon>
               <div class="text-body-2 ml-2 d-flex flex-column">
-                <span v-for="a in address" :key="a">{{ a }}</span>
+                <span v-for="a in location" :key="a">{{ a }}</span>
               </div>
             </div>
           </div>
@@ -88,7 +88,7 @@
 <script>
 export default {
   name: "AppFooter",
-  props: { contact: Object, address: Array }
+  props: { contact: Object, location: Array }
 };
 </script>
 

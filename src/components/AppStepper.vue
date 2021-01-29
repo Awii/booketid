@@ -110,7 +110,7 @@
         <v-stepper-content :step="2">
           <v-sheet
             class="d-flex flex-row justify-space-between align-center grey lighten-4 rounded-pill mx-auto pa-1 mb-6"
-            height="40"
+            height="38"
             elevation="2"
             shaped
             width="92%"
@@ -122,7 +122,7 @@
             >
               <v-icon
                 class="justify-center mdi mdi-arrow-left-drop-circle-outline transparent ma-1"
-                large
+                size="30"
                 dense
               ></v-icon>
             </v-btn>
@@ -136,7 +136,7 @@
             >
               <v-icon
                 class="justify-center mdi mdi-arrow-right-drop-circle-outline transparent ma-1"
-                large
+                size="30"
                 dense
               ></v-icon>
             </v-btn>
@@ -146,7 +146,7 @@
             <v-col
               v-for="(hourArray, key, index) in available"
               :key="key"
-              class="d-flex flex-column align-center grey lighten-3 grey--text text--darken-3 pa-1"
+              class="d-flex flex-column align-center grey lighten-4 grey--text text--darken-3 pa-1"
               :class="[key != 'sunday' ? 'mr-1' : '']"
               style="max-width: 12%"
               :style="[
@@ -169,12 +169,12 @@
               </div>
               <v-btn
                 elevation="0"
-                v-for="(hour, index) in hourArray"
+                v-for="hour in hourArray"
                 :key="hour"
-                class="white text-button"
-                style="width: 100%; min-width: 12px; padding: 0px; max-height: 32px"
-                :class="[index < hourArray.length - 1 ? 'mb-1' : '']"
-                @click="selectedHour(hour)"
+                class="white mb-2"
+                style="width: 100%; min-width: 30px"
+                v-bind="btnSize"
+                @click="selectedHour(hour, index)"
               >
                 {{ formatNumberToHours(hour) }}
               </v-btn>
@@ -193,6 +193,177 @@
             >
           </div>
         </v-stepper-content>
+
+        <v-stepper-content :step="3">
+          <v-form ref="form" v-model="valid" lazy-validation>
+            <v-row>
+              <v-col cols="12" sm="6">
+                <v-card-text>
+                  <v-text-field
+                    v-model="name"
+                    autocomplete="name"
+                    :rules="[v => !!v || 'Navn er påkrevd']"
+                    label="Navn og etternavn"
+                    required
+                  ></v-text-field>
+
+                  <v-text-field
+                    v-model="email"
+                    autocomplete="email"
+                    :rules="[
+                      v => !!v || 'E-post er påkrevd',
+                      v => /.+@.+\..+/.test(v) || 'E-post må være gyldig'
+                    ]"
+                    label="E-post"
+                    required
+                  ></v-text-field>
+
+                  <v-text-field
+                    v-model="mobile"
+                    autocomplete="tel"
+                    :rules="[
+                      v => !!v || 'Mobilnummer er påkrevd',
+                      v =>
+                        (/^\+?\d+$/.test(v) && v.length <= 12) || // 0047{nr}, +47{nr}, {nr}
+                        'Mobilnummer må være gyldig'
+                    ]"
+                    label="Mobilnummer"
+                    required
+                  ></v-text-field>
+
+                  <v-text-field
+                    v-model="address"
+                    autocomplete="address-line1"
+                    :rules="[v => !!v || 'Adresse er påkrevd']"
+                    label="Adresse"
+                    required
+                  ></v-text-field>
+
+                  <v-text-field
+                    v-model="postnr"
+                    autocomplete="postal-code"
+                    :rules="[
+                      v => !!v || 'Postnummer er påkrevd',
+                      v =>
+                        (/^\d+$/.test(v) && v.length <= 4) ||
+                        'Postnummer må være gyldig'
+                    ]"
+                    label="Postnr."
+                    required
+                  ></v-text-field>
+
+                  <v-text-field
+                    v-model="poststed"
+                    autocomplete="address-level2"
+                    :rules="[v => !!v || 'Poststed er påkrevd']"
+                    label="Poststed"
+                    required
+                  ></v-text-field>
+
+                  <v-textarea
+                    v-model="extraInfo"
+                    label="Ekstra informasjon"
+                    rows="2"
+                    auto-grow
+                  ></v-textarea>
+
+                  <v-checkbox
+                    v-if="this.$vuetify.breakpoint.smAndUp"
+                    v-model="checkbox"
+                    :rules="[
+                      v =>
+                        !!v ||
+                        'Vilkårene må aksepteres for å kunne bekrefte bookingen'
+                    ]"
+                    label="Jeg aksepterer vilkårene"
+                    required
+                  ></v-checkbox>
+                </v-card-text>
+              </v-col>
+              <v-col cols="12" sm="6">
+                <v-card-text>
+                  <div class="text-center text-body-1 font-weight-medium">
+                    Oppsummering
+                  </div>
+                  <v-simple-table dense class="mt-4">
+                    <thead>
+                      <tr>
+                        <th>Tjeneste</th>
+                        <th>Pris</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="item in checked" :key="item.name">
+                        <td
+                          :class="[
+                            checked.length > 1
+                              ? 'font-weight-medium text-caption'
+                              : 'font-weight-bold text-subtitle-2'
+                          ]"
+                        >
+                          {{ item.title }}
+                        </td>
+                        <td
+                          :class="[
+                            checked.length > 1
+                              ? 'font-weight-medium text-caption'
+                              : 'font-weight-bold text-subtitle-2'
+                          ]"
+                        >
+                          {{ item.price }}<small> kr</small>
+                        </td>
+                      </tr>
+                      <tr v-if="checked.length > 1">
+                        <th class="text-subtitle-2 font-weight-bold">Totalt</th>
+                        <th class="text-subtitle-2 font-weight-bold">
+                          {{ sum }}<small> kr</small>
+                        </th>
+                      </tr>
+                    </tbody>
+                  </v-simple-table>
+                  <div class="mt-6">
+                    <v-icon
+                      class="mdi mdi-clock-time-four-outline pr-2"
+                      aria-hidden="true"
+                      medium
+                      dense
+                    ></v-icon
+                    ><span>{{ formattedBookingTime }}</span>
+                  </div>
+                  <v-icon
+                    class="mdi mdi-map-marker pr-2"
+                    aria-hidden="true"
+                    medium
+                    dense
+                  ></v-icon>
+                  <span>{{ location.join(", ") }}</span>
+                  <div class="text-center text-body-2 font-weight-medium mt-6">
+                    Vilkår
+                  </div>
+                  <div class="mt-2" style="white-space: pre-line">
+                    {{ terms }}
+                  </div>
+                  <v-checkbox
+                    v-if="this.$vuetify.breakpoint.xsOnly"
+                    v-model="checkbox"
+                    :rules="[
+                      v =>
+                        !!v ||
+                        'Vilkårene må aksepteres for å kunne bekrefte bookingen'
+                    ]"
+                    label="Jeg aksepterer vilkårene"
+                    required
+                  ></v-checkbox>
+                </v-card-text>
+              </v-col>
+            </v-row>
+            <div class="d-flex justify-center">
+              <v-btn :disabled="!valid" color="primary" @click="validate">
+                Fullfør booking
+              </v-btn>
+            </div>
+          </v-form>
+        </v-stepper-content>
       </v-stepper-items>
     </v-stepper>
   </v-container>
@@ -202,7 +373,9 @@
 import db from "@/plugins/firebaseInit";
 import {
   addDays,
+  addMinutes,
   addWeeks,
+  format,
   getDate,
   getISOWeek,
   getMonth,
@@ -210,9 +383,11 @@ import {
   startOfWeek
 } from "date-fns";
 
+import { nb } from "date-fns/locale";
+
 export default {
   name: "AppStepper",
-  props: { steps: Array, services: Array, maxWidth: String },
+  props: { steps: Array, services: Array, maxWidth: String, location: Array },
   data() {
     let today = new Date();
     return {
@@ -232,11 +407,25 @@ export default {
       currentWeek: today,
       selectedWeek: today,
       maxWeek: addWeeks(today, 3),
+      bookingTime: null,
 
       serviceTime: 0,
       errorMsg: "Ingen timer tilgjengelig.",
       showErrorMsg: false,
-      loaded: false
+      loaded: false,
+
+      valid: true,
+      name: "",
+      email: "",
+      mobile: "",
+      address: "",
+      postnr: "",
+      poststed: "",
+      extraInfo: "",
+      checkbox: false,
+
+      terms:
+        "Avbestilling må skje senest 24 timer før avtalt tid.\nVennligst møt opp presist.\nE-post vil bli lagret og brukt til å sende påminnelse før avtalt tid."
     };
   },
   computed: {
@@ -255,7 +444,7 @@ export default {
         getYear(this.selectedWeek)
       );
     },
-    servicesLength: function() {
+    servicesDuration: function() {
       let length = 0;
       if (this.checked.length) {
         for (let i in this.checked) {
@@ -266,6 +455,33 @@ export default {
     },
     weekStart: function() {
       return startOfWeek(this.selectedWeek, { weekStartsOn: 1 });
+    },
+    btnSize: function() {
+      let width = window.innerWidth;
+      switch (true) {
+        case width < 340:
+          return { "x-small": true, height: "26px" };
+        case width < 520:
+          return { small: true, height: "30px" };
+        default:
+          return { medium: true, height: "36px" };
+      }
+    },
+    formattedBookingTime: function() {
+      if (this.bookingTime) {
+        let fBookingTime = format(
+          this.bookingTime,
+          "dd. MMMM yyyy 'kl.' kk:mm - ",
+          { locale: nb }
+        );
+        let endingHour = format(
+          addMinutes(this.bookingTime, this.servicesDuration),
+          "kk:mm"
+        );
+        return fBookingTime + endingHour;
+      } else {
+        return null;
+      }
     }
   },
   methods: {
@@ -311,18 +527,33 @@ export default {
           defRef.get().then(defDoc => {
             for (let day in defDoc.data()) {
               let hoursArray = [];
+              let start = defDoc.data()[day].start;
+              let end = defDoc.data()[day].end;
+              let taken = weekDoc.data().taken;
+              let hourlyIncrement = 0.5;
+              let duration = this.servicesDuration / 60;
+              let intervalsRequired = Math.ceil(duration / hourlyIncrement);
+
               for (
-                let hour = defDoc.data()[day].start;
-                hour < defDoc.data()[day].end;
-                hour += 0.5
+                let hour = start;
+                hour <= end - hourlyIncrement * intervalsRequired;
+                hour += hourlyIncrement
               ) {
-                if (weekDoc.data().taken) {
-                  var takenHours = weekDoc.data().taken[day];
-                }
-                if (takenHours && !takenHours.includes(hour)) {
+                if (!taken) {
                   hoursArray.push(hour);
-                } else if (!takenHours) {
-                  hoursArray.push(hour);
+                } else {
+                  let eligibleStart = true;
+                  for (let i = 0; i < intervalsRequired; i++) {
+                    if (
+                      taken[day] &&
+                      taken[day].includes(hour + i * hourlyIncrement)
+                    ) {
+                      eligibleStart = false;
+                    }
+                  }
+                  if (eligibleStart) {
+                    hoursArray.push(hour);
+                  }
                 }
               }
               this.available[day] = hoursArray;
@@ -349,8 +580,17 @@ export default {
         return num;
       }
     },
-    selectedHour(hour) {
-      this.bookingTime = hour;
+    selectedHour(hour, weekday) {
+      // weekday index from 0
+      let selectedDay = addDays(this.weekStart, weekday);
+      let bookingTime = addMinutes(selectedDay, hour * 60);
+      this.bookingTime = bookingTime;
+      this.stepper = 3;
+    },
+    validate() {
+      if (this.$refs.form.validate()) {
+        console.log(this);
+      }
     }
   }
 };
@@ -365,7 +605,16 @@ export default {
 
 @media only screen and (max-width: 599px) {
   .v-stepper__content {
-    padding: 16px 6px;
+    padding: 12px 8px;
+  }
+}
+
+@media only screen and (max-width: 359px) {
+  .v-stepper__content {
+    padding: 10px 4px;
+  }
+  .container {
+    padding: 8px;
   }
 }
 </style>
