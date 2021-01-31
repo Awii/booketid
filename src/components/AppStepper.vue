@@ -174,7 +174,7 @@
                 class="white mb-2"
                 style="width: 100%; min-width: 30px"
                 v-bind="btnSize"
-                @click="selectedHour(hour, index)"
+                @click="selectHour(hour, index)"
               >
                 {{ formatNumberToHours(hour) }}
               </v-btn>
@@ -329,15 +329,15 @@
                       dense
                     ></v-icon
                     ><span>{{ formattedBookingTime }}</span>
+                    <v-icon
+                      class="mdi mdi-map-marker pr-2"
+                      aria-hidden="true"
+                      medium
+                      dense
+                    ></v-icon>
+                    <span>{{ location.join(", ") }}</span>
                   </div>
-                  <v-icon
-                    class="mdi mdi-map-marker pr-2"
-                    aria-hidden="true"
-                    medium
-                    dense
-                  ></v-icon>
-                  <span>{{ location.join(", ") }}</span>
-                  <div class="text-center text-body-2 font-weight-medium mt-6">
+                  <div class="text-center text-body-2 font-weight-medium mt-8">
                     Vilkår
                   </div>
                   <div class="mt-2" style="white-space: pre-line">
@@ -358,11 +358,75 @@
               </v-col>
             </v-row>
             <div class="d-flex justify-center">
-              <v-btn :disabled="!valid" color="primary" @click="validate">
+              <v-btn :disabled="!valid" color="primary" @click="validate()">
                 Fullfør booking
               </v-btn>
             </div>
           </v-form>
+        </v-stepper-content>
+
+        <v-stepper-content :step="4">
+          <v-sheet
+            class="d-flex justify-center align-center"
+            style="min-height: 400px"
+          >
+            <div v-if="this.success" class="d-flex flex-column">
+              <v-icon
+                class="justify-center mdi mdi-check-circle-outline"
+                color="success"
+                size="60"
+              ></v-icon>
+
+              <div class="d-flex flex-column mt-2">
+                <span class="text-body-1 font-weight-medium mt-4">
+                  Din reservasjon har blitt registrert.
+                </span>
+                <div class="mt-2">
+                  <v-icon
+                    class="mdi mdi-clock-time-four-outline pr-2"
+                    aria-hidden="true"
+                    size="18"
+                    dense
+                  ></v-icon>
+                  <span class="text-subtitle-2">{{
+                    formattedBookingTime
+                  }}</span>
+                </div>
+                <div>
+                  <v-icon
+                    class="mdi mdi-map-marker pr-2"
+                    aria-hidden="true"
+                    size="18"
+                    dense
+                  >
+                  </v-icon>
+                  <span class="text-subtitle-2">{{ location.join(", ") }}</span>
+                </div>
+              </div>
+            </div>
+            <div v-else-if="this.error" class="d-flex flex-column">
+              <v-icon
+                class="justify-center mdi mdi-alert-circle-outline"
+                color="error"
+                size="60"
+              ></v-icon>
+
+              <div class="d-flex flex-column mt-2">
+                <span class="text-body-1 font-weight-medium mt-4">
+                  Noe gikk feil. Vennligst prøv igjen eller kontakt oss.
+                </span>
+              </div>
+            </div>
+
+            <div v-else>
+              <v-progress-circular
+                :size="70"
+                :width="7"
+                color="primary"
+                indeterminate
+              ></v-progress-circular>
+            </div>
+          </v-sheet>
         </v-stepper-content>
       </v-stepper-items>
     </v-stepper>
@@ -371,12 +435,14 @@
 
 <script>
 import db from "@/plugins/firebaseInit";
+import firebase from "firebase/app";
 import {
   addDays,
   addMinutes,
   addWeeks,
   format,
   getDate,
+  getDay,
   getISOWeek,
   getMonth,
   getYear,
@@ -408,6 +474,9 @@ export default {
       selectedWeek: today,
       maxWeek: addWeeks(today, 3),
       bookingTime: null,
+      selectedHour: null,
+      selectedWeekDay: null,
+      hourlyIncrement: 0.5,
 
       serviceTime: 0,
       errorMsg: "Ingen timer tilgjengelig.",
@@ -423,9 +492,12 @@ export default {
       poststed: "",
       extraInfo: "",
       checkbox: false,
-
       terms:
-        "Avbestilling må skje senest 24 timer før avtalt tid.\nVennligst møt opp presist.\nE-post vil bli lagret og brukt til å sende påminnelse før avtalt tid."
+        "Avbestilling må skje senest 24 timer før avtalt tid.\nVennligst møt opp presist.\nE-post vil bli lagret og brukt til å sende påminnelse før avtalt tid.",
+      intervalsRequired: 1,
+
+      success: false,
+      error: false
     };
   },
   computed: {
@@ -530,9 +602,10 @@ export default {
               let start = defDoc.data()[day].start;
               let end = defDoc.data()[day].end;
               let taken = weekDoc.data().taken;
-              let hourlyIncrement = 0.5;
+              let hourlyIncrement = this.hourlyIncrement;
               let duration = this.servicesDuration / 60;
               let intervalsRequired = Math.ceil(duration / hourlyIncrement);
+              this.intervalsRequired = intervalsRequired;
 
               for (
                 let hour = start;
@@ -580,8 +653,10 @@ export default {
         return num;
       }
     },
-    selectedHour(hour, weekday) {
+    selectHour(hour, weekday) {
       // weekday index from 0
+      this.selectedHour = hour;
+      this.selectedWeekDay = weekday;
       let selectedDay = addDays(this.weekStart, weekday);
       let bookingTime = addMinutes(selectedDay, hour * 60);
       this.bookingTime = bookingTime;
@@ -589,17 +664,85 @@ export default {
     },
     validate() {
       if (this.$refs.form.validate()) {
-        console.log(this);
+        this.stepper = 4;
+        // circular
+
+        let weekDays = [
+          "monday",
+          "tuesday",
+          "wednesday",
+          "thursday",
+          "friday",
+          "saturday",
+          "sunday"
+        ];
+
+        let week = getISOWeek(this.selectedWeek);
+        let year =
+          week > 50 && getMonth(this.selectedWeek) == 0
+            ? getYear(this.selectedWeek) - 1 // if january and week above 50, use last year's doc ref
+            : getYear(this.selectedWeek);
+        let ISOdate = String(year + "-W" + week);
+
+        // TODO: handle simultaneous
+
+        const bookingsRef = db
+          .collection("site_bookings")
+          .doc(ISOdate)
+          .collection(weekDays[getDay(this.bookingTime) - 1]);
+
+        const takenRef = db.collection("site_hours").doc(ISOdate);
+
+        bookingsRef
+          .add({
+            name: this.name,
+            email: this.email,
+            mobile: this.mobile,
+            address: this.address,
+            postnr: this.postnr,
+            poststed: this.poststed,
+            date: this.bookingTime,
+            intervals: this.intervalsRequired,
+            duration: this.servicesDuration,
+            extra: this.extraInfo,
+            services: this.checked
+          })
+          .then(() => {
+            let takenArr = [];
+            for (let i = 0; i < this.intervalsRequired; i++) {
+              takenArr.push(this.selectedHour + i * this.hourlyIncrement);
+            }
+
+            takenRef.set(
+              {
+                taken: {
+                  [weekDays[
+                    this.selectedWeekDay
+                  ]]: firebase.firestore.FieldValue.arrayUnion(...takenArr)
+                }
+              },
+              { merge: true }
+            );
+
+            setTimeout(() => {
+              this.success = true;
+            }, 600);
+          })
+          .catch(() => {
+            setTimeout(() => {
+              this.error = true;
+            }, 600);
+          });
       }
     }
   }
 };
 </script>
 
-<style scoped>
+<style>
 @media only screen and (min-width: 480px) {
   .v-stepper__label {
-    display: block !important;
+    display: flex !important;
   }
 }
 
