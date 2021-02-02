@@ -7,6 +7,7 @@
         :steps="steps"
         :services="services"
         :maxWidth="maxWidth"
+        :hourlyIncrement="hourlyIncrement"
         :location="location"
       />
     </v-main>
@@ -34,13 +35,14 @@ export default {
       title: "Site",
       logo: require("@/assets/logo.jpg"),
 
+      // stepper props
+      steps: ["Tjeneste", "Tidspunkt", "Personalia", "Bekreftelse"],
+      services: [],
+      hourlyIncrement: 0.5,
+
       // footer props
       contact: { number: "+47 900 45 100", email: "placeholder@email.com" },
       location: ["Stenersgata 1 E", "0050 Oslo"],
-
-      // stepper props
-      services: [],
-      steps: ["Tjeneste", "Tidspunkt", "Personalia", "Bekreftelse"],
 
       maxWidth: "660px"
     };
