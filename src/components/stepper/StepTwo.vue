@@ -86,7 +86,7 @@
 </template>
 
 <script>
-import db from "@/plugins/firebaseInit";
+import { db } from "@/plugins/firebaseInit";
 import {
   addDays,
   addMinutes,

@@ -1,5 +1,5 @@
 <template>
-  <div class="site">
+  <v-container fluid>
     <AppHeader :title="title" :logo="logo" :maxWidth="maxWidth" />
 
     <v-main>
@@ -12,17 +12,18 @@
       />
     </v-main>
     <AppFooter :contact="contact" :location="location" />
-  </div>
+  </v-container>
 </template>
 
 <script>
 import AppHeader from "@/components/AppHeader";
 import AppFooter from "@/components/AppFooter";
 import AppStepper from "@/components/AppStepper";
-import db from "@/plugins/firebaseInit";
+import { db } from "@/plugins/firebaseInit";
 
 export default {
   name: "Site",
+
   components: {
     AppHeader,
     AppFooter,

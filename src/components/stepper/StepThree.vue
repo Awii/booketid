@@ -176,7 +176,7 @@
 </template>
 
 <script>
-import db from "@/plugins/firebaseInit";
+import { db } from "@/plugins/firebaseInit";
 import firebase from "firebase/app";
 import {
   addMinutes,
@@ -228,7 +228,7 @@ export default {
           "sunday"
         ];
 
-        let week = getISOWeek(this.bookingTime - 1);
+        let week = getISOWeek(this.bookingTime);
         let year =
           week > 50 && getMonth(this.bookingTime) == 0
             ? getYear(this.bookingTime) - 1 // if january and week above 50, use last year's doc ref

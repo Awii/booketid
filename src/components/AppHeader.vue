@@ -1,22 +1,41 @@
 <template>
-  <v-toolbar color="primary">
-    <v-container fill-height :style="{ 'max-width': maxWidth }">
-      <v-row>
-        <v-col cols="4">
-          <v-img :src="logo" max-height="40" max-width="120" contain />
+  <v-app-bar app absolute color="white">
+    <v-container>
+      <v-row align="center" justify="start" class="flex-nowrap">
+        <v-col>
+          <v-toolbar-title>{{ title }}</v-toolbar-title>
         </v-col>
-        <v-col cols="4" class="d-flex justify-center">
-          <v-toolbar-title class="white--text">{{ title }}</v-toolbar-title>
+        <v-col>
+          <v-tabs class="d-flex justify-end">
+            <v-tab to="/site">
+              <v-icon
+                class="mdi mdi-pencil-plus-outline pr-2"
+                aria-hidden="true"
+                dense
+              >
+              </v-icon>
+              Ny booking
+            </v-tab>
+            <v-tab to="/dashboard/">
+              <v-icon
+                class="mdi mdi-account-outline pr-2"
+                aria-hidden="true"
+                dense
+              >
+              </v-icon>
+              Admin
+            </v-tab>
+          </v-tabs>
         </v-col>
-        <v-col cols="4"> </v-col>
       </v-row>
     </v-container>
-  </v-toolbar>
+  </v-app-bar>
 </template>
 
 <script>
 export default {
   name: "AppHeader",
+
   props: {
     title: String,
     logo: String,
@@ -25,4 +44,8 @@ export default {
 };
 </script>
 
-<style></style>
+<style>
+.v-tabs-bar__content {
+  width: 100%;
+}
+</style>
