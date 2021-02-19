@@ -100,9 +100,11 @@
 <script>
 import AdminHeader from "@/components/AdminHeader";
 import { db, auth } from "@/plugins/firebaseInit";
+import firebase from "firebase/app";
 import {
   addMinutes,
   format,
+  getDay,
   getISOWeek,
   getMonth,
   getYear,
@@ -205,11 +207,8 @@ export default {
     },
     calendarValue() {
       return this.value;
-    }
-  },
-
-  watch: {
-    calendarValue() {
+    },
+    ISOdate() {
       let date = parseISO(this.value);
       let week = getISOWeek(date);
       let year =
@@ -217,7 +216,13 @@ export default {
           ? getYear(date) - 1 // if january and week above 50, use last year's doc ref
           : getYear(date);
 
-      let ISOdate = year + "-W" + week;
+      return year + "-W" + week;
+    }
+  },
+
+  watch: {
+    calendarValue() {
+      let ISOdate = this.ISOdate;
       if (!this.filledISOdates.includes(ISOdate)) {
         this.filledISOdates.push(ISOdate);
         for (let day of this.weekdays) {
@@ -226,6 +231,7 @@ export default {
               .get()
               .then(querySnapshot => {
                 querySnapshot.forEach(doc => {
+                  let docId = doc.id;
                   doc = doc.data();
                   let name = doc.services.map(e => e.title).join(", ");
                   let date = doc.date.toDate();
@@ -239,7 +245,7 @@ export default {
                     extra = doc.extra + "<br><br>";
                   }
                   let details = `${extra}${doc.name}<br>${doc.email}<br>${doc.mobile}<br><br>${doc.address}<br>${doc.postnr} ${doc.poststed}`;
-                  // todo here
+
                   this.events.push({
                     name: name,
                     start: start,
@@ -249,7 +255,10 @@ export default {
                     ].concat(
                       this.shades[this.random(0, this.shades.length - 1)]
                     ),
-                    details: details
+                    details: details,
+                    bookingTimes: doc.bookingTimes,
+                    id: docId,
+                    day: this.weekdays[getDay(date) - 1]
                   });
                 });
               });
@@ -288,10 +297,30 @@ export default {
     },
 
     deleteBooking(event) {
-      /*if (window.confirm("Er du sikker på at du vil slette denne bookingen?")) {
-        // todo delete booking
-      }*/
-      console.log(event);
+      if (window.confirm("Er du sikker på at du vil slette denne bookingen?")) {
+        db.collection("site_hours")
+          .doc(this.ISOdate)
+          .set(
+            {
+              monday: firebase.firestore.FieldValue.arrayRemove(
+                ...event.bookingTimes
+              )
+            },
+            { merge: true }
+          )
+          .then(() => {
+            db.collection("site_bookings")
+              .doc(this.ISOdate)
+              .collection(event.day)
+              .doc(event.id)
+              .delete()
+              .then(() => {
+                console.log(this.events, event);
+                this.selectedOpen = false;
+                this.events.splice(this.events.indexOf(event), 1);
+              });
+          });
+      }
     }
   },
 
@@ -311,18 +340,18 @@ export default {
         if (doc.exists) {
           let earliestOpening, latestClosing;
           for (let day in doc.data()) {
-            let obj = doc.data()[day];
-            if (obj.start && obj.end) {
+            let currentDay = doc.data()[day];
+            if (currentDay.start && currentDay.end) {
               // dynamic calendar hours
               if (!earliestOpening) {
-                earliestOpening = obj.start;
-              } else if (earliestOpening > obj.start) {
-                earliestOpening = obj.start;
+                earliestOpening = currentDay.start;
+              } else if (earliestOpening > currentDay.start) {
+                earliestOpening = currentDay.start;
               }
               if (!latestClosing) {
-                latestClosing = obj.start;
-              } else if (latestClosing < obj.end) {
-                latestClosing = obj.end;
+                latestClosing = currentDay.start;
+              } else if (latestClosing < currentDay.end) {
+                latestClosing = currentDay.end;
               }
             }
           }

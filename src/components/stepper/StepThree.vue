@@ -243,9 +243,10 @@ export default {
         const takenRef = db.collection("site_hours").doc(ISOdate);
 
         takenRef.get().then(doc => {
-          let takenHours = doc.data().taken[
-            weekDays[getDay(this.bookingTime) - 1]
-          ];
+          let takenHours;
+          if (doc.data()) {
+            takenHours = doc.data()[weekDays[getDay(this.bookingTime) - 1]];
+          }
           if (takenHours) {
             for (let i in takenHours) {
               if (this.bookingTimes.includes(takenHours[i])) {
@@ -268,18 +269,17 @@ export default {
               date: this.bookingTime,
               duration: this.$store.state.servicesDuration,
               extra: this.extraInfo,
-              services: this.$store.state.checked
+              services: this.$store.state.checked,
+              bookingTimes: this.bookingTimes
             })
             .then(() => {
               takenRef.set(
                 {
-                  taken: {
-                    [weekDays[
-                      getDay(this.bookingTime) - 1
-                    ]]: firebase.firestore.FieldValue.arrayUnion(
-                      ...this.bookingTimes
-                    )
-                  }
+                  [weekDays[
+                    getDay(this.bookingTime) - 1
+                  ]]: firebase.firestore.FieldValue.arrayUnion(
+                    ...this.bookingTimes
+                  )
                 },
                 { merge: true }
               );

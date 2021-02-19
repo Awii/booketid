@@ -156,7 +156,11 @@
                               <v-text-field
                                 label="Åpner (time)"
                                 v-model="editedOpeningHours.openingHour"
-                                :rules="[rules.required, rules.number]"
+                                :rules="[
+                                  rules.required,
+                                  rules.number,
+                                  rules.hoursInterval
+                                ]"
                                 required
                               ></v-text-field>
                             </v-col>
@@ -176,7 +180,11 @@
                               <v-text-field
                                 label="Stenger (time)"
                                 v-model="editedOpeningHours.closingHour"
-                                :rules="[rules.required, rules.number]"
+                                :rules="[
+                                  rules.required,
+                                  rules.number,
+                                  rules.hoursInterval
+                                ]"
                                 required
                               ></v-text-field>
                             </v-col>
@@ -264,9 +272,12 @@ export default {
 
       rules: {
         required: value => !!value || "Påkrevd.",
-        number: value => /^\d+$/.test(value) || "Må være et tall.",
+        hoursInterval: value =>
+          (value < 24 && value >= 0) || "Må være mellom 0 og 23 timer.",
         minsInterval: value =>
-          (value < 60 && value % 30 == 0) || "Må være 0 eller 30 min."
+          (value < 60 && value >= 0 && value % 30 == 0) ||
+          "Må være 0 eller 30 min.",
+        number: value => /^\d+$/.test(value) || "Må være et tall."
       },
 
       openingHours: [],

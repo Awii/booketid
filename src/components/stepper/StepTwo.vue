@@ -199,51 +199,46 @@ export default {
       const weekRef = db.collection("site_hours").doc(ISOdate);
 
       weekRef.get().then(weekDoc => {
-        if (weekDoc.exists && !weekDoc.data().closed) {
-          defRef.get().then(defDoc => {
-            for (let day in defDoc.data()) {
-              let hoursArray = [];
-              let start = defDoc.data()[day].start;
-              let end = defDoc.data()[day].end;
-              let taken = weekDoc.data().taken;
-              let duration = this.servicesDuration / 60;
-              let intervalsRequired = Math.ceil(
-                duration / this.hourlyIncrement
-              );
+        defRef.get().then(defDoc => {
+          for (let day in defDoc.data()) {
+            let hoursArray = [];
+            let start = defDoc.data()[day].start;
+            let end = defDoc.data()[day].end;
+            let duration = this.servicesDuration / 60;
+            let intervalsRequired = Math.ceil(duration / this.hourlyIncrement);
 
-              for (
-                let hour = start;
-                hour <= end - this.hourlyIncrement * intervalsRequired;
-                hour += this.hourlyIncrement
-              ) {
-                if (!taken) {
+            for (
+              let hour = start;
+              hour <= end - this.hourlyIncrement * intervalsRequired;
+              hour += this.hourlyIncrement
+            ) {
+              if (!weekDoc.data()) {
+                hoursArray.push(hour);
+              } else {
+                let eligibleStart = true;
+                // check if future intervals not taken as well
+                for (let i = 0; i < intervalsRequired; i++) {
+                  if (
+                    weekDoc.data()[day] &&
+                    weekDoc
+                      .data()
+                      [day].includes(hour + i * this.hourlyIncrement)
+                  ) {
+                    eligibleStart = false;
+                  }
+                }
+                if (eligibleStart) {
                   hoursArray.push(hour);
-                } else {
-                  let eligibleStart = true;
-                  // check if future intervals not taken as well
-                  for (let i = 0; i < intervalsRequired; i++) {
-                    if (
-                      taken[day] &&
-                      taken[day].includes(hour + i * this.hourlyIncrement)
-                    ) {
-                      eligibleStart = false;
-                    }
-                  }
-                  if (eligibleStart) {
-                    hoursArray.push(hour);
-                  }
                 }
               }
               this.available[day] = hoursArray;
             }
-            this.loaded = true;
-          });
-        } else {
-          this.showErrorMsg = true;
+          }
           this.loaded = true;
-        }
+        });
       });
     },
+
     formatNumberToHours(input) {
       let hours = Math.floor(input);
       if (hours < 10) hours = "0" + hours;
