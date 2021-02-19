@@ -1,12 +1,12 @@
 <template>
   <v-app-bar app absolute color="white">
     <v-container>
-      <v-row align="center" justify="start" class="flex-nowrap">
-        <v-col>
+      <v-row align="center" class="flex-nowrap">
+        <v-col v-if="$vuetify.breakpoint.smAndUp" class="mr-2">
           <v-toolbar-title>{{ title }}</v-toolbar-title>
         </v-col>
-        <v-col>
-          <v-tabs class="d-flex justify-end">
+        <v-col class="d-flex flex-row">
+          <v-tabs class="d-flex justify-end" style="margin-right: 48px">
             <v-tab to="/site">
               <v-icon
                 class="mdi mdi-pencil-plus-outline pr-2"
@@ -16,7 +16,7 @@
               </v-icon>
               Ny booking
             </v-tab>
-            <v-tab to="/dashboard/">
+            <v-tab to="/dashboard">
               <v-icon
                 class="mdi mdi-account-outline pr-2"
                 aria-hidden="true"

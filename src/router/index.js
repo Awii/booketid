@@ -33,7 +33,7 @@ const routes = [
     }
   },
   {
-    path: "/dashboard/settings",
+    path: "/settings",
     name: "AdminSettings",
     component: () =>
       import(

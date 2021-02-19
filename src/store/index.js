@@ -13,7 +13,7 @@ export default new Vuex.Store({
     servicesDuration: null,
     success: null,
 
-    userProfile: {},
+    user: {},
 
     snackbar: false
   },
@@ -33,8 +33,8 @@ export default new Vuex.Store({
     updateSuccess(state, payload) {
       state.success = payload;
     },
-    updateUserProfile(state, payload) {
-      state.userProfile = payload;
+    updateUser(state, payload) {
+      state.user = payload;
     },
     updateSnackbar(state, payload) {
       state.snackbar = payload;
@@ -45,12 +45,19 @@ export default new Vuex.Store({
       fb.auth
         .signInWithEmailAndPassword(form.email, form.password)
         .then(user => {
-          commit("updateUserProfile", user);
+          commit("updateUser", user);
           router.push("/dashboard");
         })
         .catch(() => {
           commit("updateSnackbar", true);
         });
+    },
+
+    async logout({ commit }) {
+      fb.auth.signOut().then(() => {
+        commit("updateUser", null);
+        router.push("/dashboard/login");
+      });
     }
   },
   modules: {}

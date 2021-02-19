@@ -1,6 +1,6 @@
 <template>
   <v-container fluid fill-height>
-    <AppHeader :title="title" :logo="logo" :maxWidth="maxWidth" />
+    <AdminHeader :title="title" :logo="logo" :maxWidth="maxWidth" />
     <v-main>
       <v-row justify="center" class="mt-0">
         <v-col style="max-width: 1200px" class="d-flex align-center">
@@ -85,7 +85,9 @@
                   Avbryt
                 </v-btn>
                 <v-spacer></v-spacer>
-                <v-btn color="error" @click="deleteBooking()">Slett</v-btn>
+                <v-btn color="error" @click="deleteBooking(selectedEvent)"
+                  >Slett</v-btn
+                >
               </v-card-actions>
             </v-card>
           </v-menu>
@@ -96,7 +98,7 @@
 </template>
 
 <script>
-import AppHeader from "@/components/AppHeader";
+import AdminHeader from "@/components/AdminHeader";
 import { db, auth } from "@/plugins/firebaseInit";
 import {
   addMinutes,
@@ -111,10 +113,8 @@ export default {
   name: "AdminDashboard",
 
   components: {
-    AppHeader
+    AdminHeader
   },
-
-  props: ["user"],
 
   data() {
     let today = format(new Date(), "yyyy-MM-dd");
@@ -287,10 +287,11 @@ export default {
       return Math.floor((Math.abs(a - b) + 1) * Math.random()) + a;
     },
 
-    deleteBooking() {
-      if (window.confirm("Er du sikker på at du vil slette denne bookingen?")) {
+    deleteBooking(event) {
+      /*if (window.confirm("Er du sikker på at du vil slette denne bookingen?")) {
         // todo delete booking
-      }
+      }*/
+      console.log(event);
     }
   },
 
