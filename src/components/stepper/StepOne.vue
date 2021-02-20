@@ -1,5 +1,5 @@
-<template
-  ><v-stepper-content :step="step">
+<template>
+  <v-stepper-content :step="step">
     <v-row v-if="services">
       <v-col cols="12" sm="7">
         <v-card
