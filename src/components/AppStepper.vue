@@ -1,5 +1,5 @@
 <template>
-  <v-container :style="{ 'max-width': maxWidth }" class="mt-4">
+  <v-container :style="{ 'max-width': details.maxWidth }" class="mt-4">
     <v-stepper
       v-model="stepper"
       :alt-labels="$vuetify.breakpoint.smAndUp"
@@ -7,14 +7,17 @@
       :vertical="$vuetify.breakpoint.xsOnly"
     >
       <v-stepper-header v-if="$vuetify.breakpoint.smAndUp">
-        <template v-for="(step, index) in steps">
+        <template v-for="(step, index) in details.steps">
           <v-stepper-step
             :key="index"
             :complete="stepper > index + 1"
             :step="index + 1"
             >{{ step }}
           </v-stepper-step>
-          <v-divider :key="step" v-if="index !== steps.length - 1"></v-divider>
+          <v-divider
+            :key="step"
+            v-if="index !== details.steps.length - 1"
+          ></v-divider>
         </template>
       </v-stepper-header>
 
@@ -24,30 +27,30 @@
           :step="1"
           :complete="stepper > 1"
         >
-          {{ steps[0] }}
+          {{ details.steps[0] }}
         </v-stepper-step>
-        <StepOne :step="1" :services="services" />
+        <StepOne :step="1" :services="this.$store.state.services" />
 
         <v-stepper-step
           v-if="$vuetify.breakpoint.xsOnly"
           :step="2"
           :complete="stepper > 2"
         >
-          {{ steps[1] }}
+          {{ details.steps[1] }}
         </v-stepper-step>
-        <StepTwo :step="2" :hourlyIncrement="hourlyIncrement" />
+        <StepTwo :step="2" :hourlyIncrement="details.hourlyIncrement" />
 
         <v-stepper-step
           v-if="$vuetify.breakpoint.xsOnly"
           :step="3"
           :complete="stepper > 3"
         >
-          {{ steps[2] }}
+          {{ details.steps[2] }}
         </v-stepper-step>
         <StepThree
           :step="3"
-          :location="location"
-          :hourlyIncrement="hourlyIncrement"
+          :location="details.location"
+          :hourlyIncrement="details.hourlyIncrement"
         />
 
         <v-stepper-step
@@ -55,9 +58,9 @@
           :step="4"
           :complete="stepper > 4"
         >
-          {{ steps[3] }}
+          {{ details.steps[3] }}
         </v-stepper-step>
-        <StepFour :step="4" :location="location" />
+        <StepFour :step="4" :location="details.location" />
       </v-stepper-items>
     </v-stepper>
   </v-container>
@@ -72,13 +75,6 @@ import StepFour from "@/components/stepper/StepFour";
 export default {
   name: "AppStepper",
   components: { StepOne, StepTwo, StepThree, StepFour },
-  props: {
-    steps: Array,
-    services: Array,
-    maxWidth: String,
-    hourlyIncrement: Number,
-    location: Array
-  },
 
   data() {
     return {
@@ -89,8 +85,11 @@ export default {
     };
   },
   computed: {
-    stepper: function() {
+    stepper() {
       return this.$store.state.step;
+    },
+    details() {
+      return this.$store.state.details;
     }
   }
 };

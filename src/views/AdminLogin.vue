@@ -1,7 +1,7 @@
 <template>
   <v-container fluid fill-height>
     <AppHeader :title="title" :logo="logo" :maxWidth="maxWidth" />
-    <v-row class="justify-center align-center">
+    <v-row class="justify-center align-center mx-0">
       <v-col cols="12" style="max-width: 600px">
         <v-card class="elevation-8">
           <v-toolbar dark color="primary darken-1">
@@ -19,6 +19,7 @@
                 ]"
                 label="E-post"
                 required
+                validate-on-blur
               >
               </v-text-field>
               <v-text-field
@@ -34,6 +35,7 @@
                 hint="Minst 8 tegn"
                 counter
                 @click:append="showPassword = !showPassword"
+                validate-on-blur
               ></v-text-field>
             </v-container>
             <v-card-actions>

@@ -1,6 +1,7 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
 import { auth } from "@/plugins/firebaseInit";
+import sites from "@/sites.js";
 
 Vue.use(VueRouter);
 
@@ -9,11 +10,6 @@ const routes = [
     path: "/",
     name: "Home",
     component: () => import(/* webpackChunkName: "home" */ "../views/Home.vue")
-  },
-  {
-    path: "/site",
-    name: "Site",
-    component: () => import(/* webpackChunkName: "site" */ "../views/Site.vue")
   },
   {
     path: "/dashboard/login",
@@ -44,6 +40,16 @@ const routes = [
     }
   }
 ];
+
+for (let site of sites) {
+  routes.push({
+    path: site.path,
+    name: site.name,
+    props: site,
+    component: () =>
+      import(/* webpackChunkName: "[request]" */ "../views/sites/Default.vue")
+  });
+}
 
 const router = new VueRouter({
   mode: "history",

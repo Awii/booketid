@@ -9,8 +9,8 @@
           style="border: 1px solid #ddd"
         >
           <div class="d-flex flex-column">
-            <span class="text-subtitle-2"> {{ service.title }}</span>
-            <span class="text-body-2">{{ service.subtitle }}</span>
+            <span class="text-subtitle-2"> {{ service.service }}</span>
+            <span class="text-body-2">{{ service.description }}</span>
           </div>
           <div
             class="d-flex flex-row align-center text-no-wrap text-subtitle-2 pl-2 my-n4 mr-n1"

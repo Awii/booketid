@@ -54,7 +54,7 @@
                           rows="1"
                         ></v-textarea>
                         <v-text-field
-                          label="Varighet"
+                          label="Varighet (min)"
                           v-model="editedService.duration"
                           :rules="[rules.required, rules.number]"
                           required
@@ -235,7 +235,8 @@
 
 <script>
 import AdminHeader from "@/components/AdminHeader";
-import { db } from "@/plugins/firebaseInit";
+import { db, auth } from "@/plugins/firebaseInit";
+import users from "@/users.js";
 
 export default {
   name: "AdminSettings",
@@ -326,63 +327,91 @@ export default {
   },
 
   created() {
-    let servicesRef = db.collection("site_services");
+    let servicesRef = db.collection(`${this.fbPrefix}_services`);
 
     servicesRef.get().then(querySnapshot => {
       querySnapshot.forEach(doc => {
         this.services.push({
-          service: doc.data().title,
-          description: doc.data().subtitle,
-          duration: doc.data().minutes,
+          service: doc.data().service,
+          description: doc.data().description,
+          duration: doc.data().duration,
           price: doc.data().price,
           docId: doc.id
         });
       });
     });
 
-    let openingRef = db.collection("site_hours").doc("default");
+    let openingRef = db.collection(`${this.fbPrefix}_hours`).doc("default");
+
     openingRef.get().then(doc => {
       let openingHours = [];
-      for (let day in doc.data()) {
-        let currentDay = doc.data()[day];
-        let openingHour = "",
-          openingMinute = "0",
-          closingHour = "",
-          closingMinute = "0";
+      if (doc.exists) {
+        for (let day in doc.data()) {
+          let currentDay = doc.data()[day];
+          let openingHour = "",
+            openingMinute = "0",
+            closingHour = "",
+            closingMinute = "0";
 
-        if (typeof currentDay.start == "number") {
-          openingHour = Math.floor(currentDay.start);
-          openingMinute = String((currentDay.start * 60) % 60);
+          if (typeof currentDay.start == "number") {
+            openingHour = Math.floor(currentDay.start);
+            openingMinute = String((currentDay.start * 60) % 60);
+          }
+
+          if (typeof currentDay.end == "number") {
+            closingHour = Math.floor(currentDay.end);
+            closingMinute = String((currentDay.end * 60) % 60);
+          }
+
+          openingHours.push({
+            day: this.weekdays[day],
+            openingHour: openingHour,
+            openingMinute: openingMinute,
+            closingHour: closingHour,
+            closingMinute: closingMinute
+          });
         }
 
-        if (typeof currentDay.end == "number") {
-          closingHour = Math.floor(currentDay.end);
-          closingMinute = String((currentDay.end * 60) % 60);
-        }
+        openingHours.sort((a, b) => {
+          let days = {
+            Mandag: 1,
+            Tirsdag: 2,
+            Onsdag: 3,
+            Torsdag: 4,
+            Fredag: 5,
+            Lørdag: 6,
+            Søndag: 7
+          };
 
-        openingHours.push({
-          day: this.weekdays[day],
-          openingHour: openingHour,
-          openingMinute: openingMinute,
-          closingHour: closingHour,
-          closingMinute: closingMinute
+          let day1 = a.day;
+          let day2 = b.day;
+          return days[day1] - days[day2];
         });
+      } else {
+        openingRef
+          .set({
+            monday: {},
+            tuesday: {},
+            wednesday: {},
+            thursday: {},
+            friday: {},
+            saturday: {},
+            sunday: {}
+          })
+          .then(() => {
+            console.log(this.weekdays, this.weekdays.length);
+            for (let day in this.weekdays) {
+              openingHours.push({
+                day: this.weekdays[day],
+                openingHour: "",
+                openingMinute: "0",
+                closingHour: "",
+                closingMinute: "0"
+              });
+            }
+            this.openingHours = openingHours;
+          });
       }
-      openingHours.sort((a, b) => {
-        let days = {
-          Mandag: 1,
-          Tirsdag: 2,
-          Onsdag: 3,
-          Torsdag: 4,
-          Fredag: 5,
-          Lørdag: 6,
-          Søndag: 7
-        };
-
-        let day1 = a.day;
-        let day2 = b.day;
-        return days[day1] - days[day2];
-      });
       this.openingHours = openingHours;
     });
   },
@@ -401,6 +430,10 @@ export default {
       } else {
         return {};
       }
+    },
+
+    fbPrefix() {
+      return users[auth.currentUser.uid];
     }
   },
 
@@ -417,7 +450,7 @@ export default {
           `Er du sikker på at du vil fjerne tjenesten "${item.service}" ?`
         )
       ) {
-        db.collection("site_services")
+        db.collection(`${this.fbPrefix}_services`)
           .doc(item.docId)
           .delete()
           .then(() => {
@@ -428,12 +461,12 @@ export default {
     saveService() {
       if (this.$refs.servicesForm.validate()) {
         if (this.editing) {
-          db.collection("site_services")
+          db.collection(`${this.fbPrefix}_services`)
             .doc(this.editedService.docId)
             .set({
-              title: this.editedService.service,
-              subtitle: this.editedService.description,
-              minutes: this.editedService.duration,
+              service: this.editedService.service,
+              description: this.editedService.description,
+              duration: this.editedService.duration,
               price: this.editedService.price
             })
             .then(() => {
@@ -444,11 +477,11 @@ export default {
               this.closeService();
             });
         } else {
-          db.collection("site_services")
+          db.collection(`${this.fbPrefix}_services`)
             .add({
-              title: this.editedService.service,
-              subtitle: this.editedService.description,
-              minutes: this.editedService.duration,
+              service: this.editedService.service,
+              description: this.editedService.description,
+              duration: this.editedService.duration,
               price: this.editedService.price
             })
             .then(() => {
@@ -482,7 +515,7 @@ export default {
           key => this.weekdays[key] === item.day
         );
 
-        db.collection("site_hours")
+        db.collection(`${this.fbPrefix}_hours`)
           .doc("default")
           .set(
             {
@@ -513,7 +546,7 @@ export default {
           parseInt(this.editedOpeningHours.closingHour) +
           parseInt(this.editedOpeningHours.closingMinute) / 60;
 
-        db.collection("site_hours")
+        db.collection(`${this.fbPrefix}_hours`)
           .doc("default")
           .set(
             {

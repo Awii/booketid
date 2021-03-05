@@ -7,7 +7,7 @@
         </v-col>
         <v-col class="d-flex flex-row">
           <v-tabs class="d-flex justify-end" style="margin-right: 48px">
-            <v-tab to="/site">
+            <v-tab :to="this.$store.state.details.path">
               <v-icon
                 class="mdi mdi-pencil-plus-outline pr-2"
                 aria-hidden="true"

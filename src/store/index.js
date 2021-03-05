@@ -7,19 +7,24 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
+    details: {},
     step: 1,
+    services: null,
     checked: null,
     bookingTime: null,
     servicesDuration: null,
     success: null,
-
-    user: {},
-
     snackbar: false
   },
   mutations: {
+    updateSiteDetails(state, payload) {
+      state.details = payload;
+    },
     updateStep(state, payload) {
       state.step = payload;
+    },
+    updateServices(state, payload) {
+      state.services = payload;
     },
     updateChecked(state, payload) {
       state.checked = payload;
@@ -33,9 +38,6 @@ export default new Vuex.Store({
     updateSuccess(state, payload) {
       state.success = payload;
     },
-    updateUser(state, payload) {
-      state.user = payload;
-    },
     updateSnackbar(state, payload) {
       state.snackbar = payload;
     }
@@ -44,8 +46,7 @@ export default new Vuex.Store({
     async login({ commit }, form) {
       fb.auth
         .signInWithEmailAndPassword(form.email, form.password)
-        .then(user => {
-          commit("updateUser", user);
+        .then(() => {
           router.push("/dashboard");
         })
         .catch(() => {
@@ -53,9 +54,8 @@ export default new Vuex.Store({
         });
     },
 
-    async logout({ commit }) {
+    async logout() {
       fb.auth.signOut().then(() => {
-        commit("updateUser", null);
         router.push("/dashboard/login");
       });
     }

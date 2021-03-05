@@ -143,7 +143,7 @@
                   medium
                   dense
                 ></v-icon>
-                <span>{{ location.join(", ") }}</span>
+                <span>{{ this.$store.state.details.location.join(", ") }}</span>
               </div>
             </div>
             <div class="text-center text-body-2 font-weight-medium mt-8">
@@ -192,7 +192,6 @@ import { nb } from "date-fns/locale";
 
 export default {
   name: "StepThree",
-  props: { step: Number, location: Array, hourlyIncrement: Number },
 
   data() {
     return {
@@ -206,9 +205,7 @@ export default {
       postnr: "",
       poststed: "",
       extraInfo: "",
-      checkbox: false,
-      terms:
-        "Avbestilling må skje senest 24 timer før avtalt tid.\nVennligst møt opp presist.\nE-post vil bli lagret og brukt til å sende påminnelse før avtalt tid."
+      checkbox: false
     };
   },
 
@@ -236,11 +233,13 @@ export default {
         let ISOdate = String(year + "-W" + week);
 
         const bookingsRef = db
-          .collection("site_bookings")
+          .collection(`${this.$store.state.details.fbPrefix}_bookings`)
           .doc(ISOdate)
           .collection(weekDays[getDay(this.bookingTime) - 1]);
 
-        const takenRef = db.collection("site_hours").doc(ISOdate);
+        const takenRef = db
+          .collection(`${this.$store.state.details.fbPrefix}_hours`)
+          .doc(ISOdate);
 
         takenRef.get().then(doc => {
           let takenHours;
@@ -298,6 +297,12 @@ export default {
     }
   },
   computed: {
+    step() {
+      return this.$store.state.stepper;
+    },
+    hourlyIncrement() {
+      return this.$store.state.details.hourlyIncrement;
+    },
     bookingTime() {
       return this.$store.state.bookingTime;
     },
@@ -330,6 +335,9 @@ export default {
         takenArr.push(hour + i * this.hourlyIncrement);
       }
       return takenArr;
+    },
+    terms() {
+      return this.$store.state.details.terms;
     }
   }
 };

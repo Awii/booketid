@@ -100,6 +100,7 @@
 <script>
 import AdminHeader from "@/components/AdminHeader";
 import { db, auth } from "@/plugins/firebaseInit";
+import users from "@/users.js";
 import firebase from "firebase/app";
 import {
   addMinutes,
@@ -202,9 +203,6 @@ export default {
         return 2 * (this.latestClosing - this.earliestOpening);
       }
     },
-    currentUser() {
-      return auth.currentUser;
-    },
     calendarValue() {
       return this.value;
     },
@@ -217,6 +215,9 @@ export default {
           : getYear(date);
 
       return year + "-W" + week;
+    },
+    fbPrefix() {
+      return users[auth.currentUser.uid];
     }
   },
 
@@ -227,7 +228,7 @@ export default {
         this.filledISOdates.push(ISOdate);
         for (let day of this.weekdays) {
           if (auth.currentUser.uid === "Uun0qxVk8KOHCbwm4HhPnPqVBbV2") {
-            db.collection(`site_bookings/${ISOdate}/${day}`)
+            db.collection(`${this.fbPrefix}_bookings/${ISOdate}/${day}`)
               .get()
               .then(querySnapshot => {
                 querySnapshot.forEach(doc => {
@@ -298,7 +299,7 @@ export default {
 
     deleteBooking(event) {
       if (window.confirm("Er du sikker på at du vil slette denne bookingen?")) {
-        db.collection("site_hours")
+        db.collection(`${this.fbPrefix}_hours`)
           .doc(this.ISOdate)
           .set(
             {
@@ -309,13 +310,12 @@ export default {
             { merge: true }
           )
           .then(() => {
-            db.collection("site_bookings")
+            db.collection(`${this.fbPrefix}_bookings`)
               .doc(this.ISOdate)
               .collection(event.day)
               .doc(event.id)
               .delete()
               .then(() => {
-                console.log(this.events, event);
                 this.selectedOpen = false;
                 this.events.splice(this.events.indexOf(event), 1);
               });
@@ -325,6 +325,13 @@ export default {
   },
 
   created() {
+    if (!this.$store.state.details.path) {
+      this.$store.commit("updateSiteDetails", {
+        ...this.$store.state.details,
+        path: "/" + this.fbPrefix
+      });
+    }
+
     if (this.$vuetify.breakpoint.xs) {
       this.type = "day";
     } else if (this.$vuetify.breakpoint.sm) {
@@ -333,7 +340,7 @@ export default {
 
     this.value = this.today;
 
-    db.collection("site_hours")
+    db.collection(`${this.fbPrefix}_hours`)
       .doc("default")
       .get()
       .then(doc => {
@@ -375,28 +382,5 @@ export default {
 .v-btn--fab.v-size--default {
   height: 40px;
   width: 40px;
-}
-
-.my-event {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  border-radius: 2px;
-  background-color: #1867c0;
-  color: #ffffff;
-  border: 1px solid #1867c0;
-  font-size: 12px;
-  padding: 3px;
-  cursor: pointer;
-  margin-bottom: 1px;
-  left: 4px;
-  margin-right: 8px;
-  position: relative;
-}
-
-.my-event.with-time {
-  position: absolute;
-  right: 4px;
-  margin-right: 0px;
 }
 </style>

@@ -34,13 +34,17 @@
       </v-btn>
     </v-sheet>
 
-    <v-row v-if="!showErrorMsg && loaded" class="mb-2" justify="center">
+    <v-row
+      v-if="!showErrorMsg && loaded"
+      class="mb-2 px-0 mx-0"
+      justify="center"
+    >
       <v-col
         v-for="(hourArray, key, index) in available"
         :key="key"
-        class="d-flex flex-column align-center grey lighten-4 grey--text text--darken-3 pa-1"
+        class="d-flex flex-column align-center grey lighten-4 grey--text text--darken-3 py-1 px-1"
         :class="[key != 'sunday' ? 'mr-1' : '']"
-        style="max-width: 12%"
+        style="max-width: 12.8%"
         :style="[
           key == 'monday' ? { 'border-radius': '8px 0px 0px 8px' } : '',
           key == 'sunday' ? { 'border-radius': '0px 8px 8px 0px' } : ''
@@ -61,9 +65,10 @@
         </div>
         <v-btn
           elevation="0"
-          v-for="hour in hourArray"
+          v-for="(hour, i) in hourArray"
           :key="hour"
-          class="white mb-2"
+          class="white"
+          :class="[i < hourArray.length - 1 ? 'mb-2' : '']"
           style="width: 100%; min-width: 30px"
           v-bind="btnSize"
           @click="selectTime(hour, index)"
@@ -109,7 +114,7 @@ export default {
 
       currentWeek: today,
       selectedWeek: today,
-      maxWeek: addWeeks(today, 3),
+      maxWeek: addWeeks(today, this.$store.state.details.weeksToLoad - 1),
 
       errorMsg: "Ingen timer tilgjengelig.",
       showErrorMsg: false,
@@ -194,9 +199,13 @@ export default {
       let ISOdate = String(year + "-W" + week);
 
       // default opening hours
-      const defRef = db.collection("site_hours").doc("default");
+      const defRef = db
+        .collection(`${this.$store.state.details.fbPrefix}_hours`)
+        .doc("default");
       // taken hours
-      const weekRef = db.collection("site_hours").doc(ISOdate);
+      const weekRef = db
+        .collection(`${this.$store.state.details.fbPrefix}_hours`)
+        .doc(ISOdate);
 
       weekRef.get().then(weekDoc => {
         defRef.get().then(defDoc => {
