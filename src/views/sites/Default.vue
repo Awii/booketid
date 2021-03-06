@@ -5,7 +5,11 @@
     <v-main>
       <AppStepper />
     </v-main>
-    <AppFooter :contact="this.data.contact" :location="this.data.location" />
+    <AppFooter
+      :contact="this.data.contact"
+      :location="this.data.location"
+      :social="this.data.social"
+    />
   </v-container>
 </template>
 
