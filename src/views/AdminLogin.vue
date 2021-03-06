@@ -1,6 +1,6 @@
 <template>
   <v-container fluid fill-height>
-    <AppHeader :title="title" :logo="logo" :maxWidth="maxWidth" />
+    <AppHeader />
     <v-row class="justify-center align-center mx-0">
       <v-col cols="12" style="max-width: 600px">
         <v-card class="elevation-8">
@@ -66,21 +66,6 @@ export default {
 
   data() {
     return {
-      // navbar props
-      title: "Site",
-      logo: require("@/assets/logo.jpg"),
-
-      // stepper props
-      steps: ["Tjeneste", "Tidspunkt", "Personalia", "Bekreftelse"],
-      services: [],
-      hourlyIncrement: 0.5,
-
-      // footer props
-      contact: { number: "+47 900 45 100", email: "placeholder@email.com" },
-      location: ["Stenersgata 1 E", "0050 Oslo"],
-
-      maxWidth: "660px",
-
       valid: true,
       email: "",
       password: "",

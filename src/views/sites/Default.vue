@@ -37,6 +37,7 @@ export default {
 
   created() {
     this.$store.commit("updateSiteDetails", {
+      title: this.data.title,
       fbPrefix: this.data.fbPrefix,
       steps: this.steps,
       path: this.$route.path,

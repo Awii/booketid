@@ -78,8 +78,6 @@ export default {
 
   data() {
     return {
-      checked: [],
-
       success: false,
       error: false
     };

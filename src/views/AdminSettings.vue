@@ -1,6 +1,6 @@
 <template>
   <v-container fluid v-bind="smAndUp">
-    <AdminHeader :title="title" :logo="logo" :maxWidth="maxWidth" />
+    <AppHeader :title="title" :maxWidth="maxWidth" />
 
     <v-main>
       <v-row justify="center" class="mt-0">
@@ -234,7 +234,7 @@
 </template>
 
 <script>
-import AdminHeader from "@/components/AdminHeader";
+import AppHeader from "@/components/AppHeader";
 import { db, auth } from "@/plugins/firebaseInit";
 import users from "@/users.js";
 
@@ -242,7 +242,7 @@ export default {
   name: "AdminSettings",
 
   components: {
-    AdminHeader
+    AppHeader
   },
 
   data() {
@@ -399,7 +399,6 @@ export default {
             sunday: {}
           })
           .then(() => {
-            console.log(this.weekdays, this.weekdays.length);
             for (let day in this.weekdays) {
               openingHours.push({
                 day: this.weekdays[day],
@@ -433,7 +432,7 @@ export default {
     },
 
     fbPrefix() {
-      return users[auth.currentUser.uid];
+      return users[auth.currentUser.uid].fbPrefix;
     }
   },
 

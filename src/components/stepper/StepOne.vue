@@ -20,7 +20,7 @@
               class="pl-1"
               color="primary darken-2"
               v-model="checked"
-              :value="service"
+              :value="index"
             >
             </v-checkbox>
           </div>
@@ -37,7 +37,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="item in checked" :key="item.name">
+                <tr v-for="(item, index) in checked" :key="index">
                   <td
                     :class="[
                       checked.length > 1
@@ -45,7 +45,7 @@
                         : 'font-weight-bold text-subtitle-2'
                     ]"
                   >
-                    {{ item.title }}
+                    {{ services[item].service }}
                   </td>
                   <td
                     :class="[
@@ -54,7 +54,7 @@
                         : 'font-weight-bold text-subtitle-2'
                     ]"
                   >
-                    {{ item.price }}<small> kr</small>
+                    {{ services[item].price }}<small> kr</small>
                   </td>
                 </tr>
                 <tr v-if="checked.length > 1">
@@ -97,17 +97,15 @@ export default {
   props: { step: Number, services: Array },
 
   data() {
-    return {
-      checked: []
-    };
+    return { checked: [] };
   },
 
   computed: {
     servicesPrice() {
       let val = 0;
-      this.checked.forEach(e => {
-        val += parseInt(e.price);
-      });
+      for (let i of this.checked) {
+        val += parseInt(this.services[i].price);
+      }
       return val;
     }
   },

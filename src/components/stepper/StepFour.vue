@@ -67,7 +67,7 @@ import { format } from "date-fns";
 import { addMinutes } from "date-fns";
 import { nb } from "date-fns/locale";
 export default {
-  name: "StepOne",
+  name: "StepFour",
   props: { step: Number, location: Array },
 
   computed: {

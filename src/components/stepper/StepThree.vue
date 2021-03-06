@@ -98,7 +98,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="item in checked" :key="item.name">
+                <tr v-for="(item, index) in checked" :key="index">
                   <td
                     :class="[
                       checked.length > 1
@@ -106,7 +106,7 @@
                         : 'font-weight-bold text-subtitle-2'
                     ]"
                   >
-                    {{ item.title }}
+                    {{ item.service }}
                   </td>
                   <td
                     :class="[
@@ -268,8 +268,10 @@ export default {
               date: this.bookingTime,
               duration: this.$store.state.servicesDuration,
               extra: this.extraInfo,
-              services: this.$store.state.checked,
-              bookingTimes: this.bookingTimes
+              bookingTimes: this.bookingTimes,
+              services: this.$store.state.checked.map(
+                i => this.$store.state.services[i]
+              )
             })
             .then(() => {
               takenRef.set(

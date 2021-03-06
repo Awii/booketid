@@ -1,6 +1,6 @@
 <template>
   <v-container fluid fill-height>
-    <AdminHeader :title="title" :logo="logo" :maxWidth="maxWidth" />
+    <AppHeader :title="title" :maxWidth="maxWidth" />
     <v-main>
       <v-row justify="center" class="mt-0">
         <v-col style="max-width: 1200px" class="d-flex align-center">
@@ -98,7 +98,7 @@
 </template>
 
 <script>
-import AdminHeader from "@/components/AdminHeader";
+import AppHeader from "@/components/AppHeader";
 import { db, auth } from "@/plugins/firebaseInit";
 import users from "@/users.js";
 import firebase from "firebase/app";
@@ -116,7 +116,7 @@ export default {
   name: "AdminDashboard",
 
   components: {
-    AdminHeader
+    AppHeader
   },
 
   data() {
@@ -217,7 +217,7 @@ export default {
       return year + "-W" + week;
     },
     fbPrefix() {
-      return users[auth.currentUser.uid];
+      return users[auth.currentUser.uid].fbPrefix;
     }
   },
 
@@ -227,43 +227,39 @@ export default {
       if (!this.filledISOdates.includes(ISOdate)) {
         this.filledISOdates.push(ISOdate);
         for (let day of this.weekdays) {
-          if (auth.currentUser.uid === "Uun0qxVk8KOHCbwm4HhPnPqVBbV2") {
-            db.collection(`${this.fbPrefix}_bookings/${ISOdate}/${day}`)
-              .get()
-              .then(querySnapshot => {
-                querySnapshot.forEach(doc => {
-                  let docId = doc.id;
-                  doc = doc.data();
-                  let name = doc.services.map(e => e.title).join(", ");
-                  let date = doc.date.toDate();
-                  let start = format(date, "yyyy-MM-dd HH:mm");
-                  let end = format(
-                    addMinutes(date, doc.duration),
-                    "yyyy-MM-dd HH:mm"
-                  );
-                  let extra = "";
-                  if (doc.extra) {
-                    extra = doc.extra + "<br><br>";
-                  }
-                  let details = `${extra}${doc.name}<br>${doc.email}<br>${doc.mobile}<br><br>${doc.address}<br>${doc.postnr} ${doc.poststed}`;
+          db.collection(`${this.fbPrefix}_bookings/${ISOdate}/${day}`)
+            .get()
+            .then(querySnapshot => {
+              querySnapshot.forEach(doc => {
+                let docId = doc.id;
+                doc = doc.data();
+                let name = doc.services.map(e => e.service).join(", ");
+                let date = doc.date.toDate();
+                let start = format(date, "yyyy-MM-dd HH:mm");
+                let end = format(
+                  addMinutes(date, doc.duration),
+                  "yyyy-MM-dd HH:mm"
+                );
+                let extra = "";
+                if (doc.extra) {
+                  extra = doc.extra + "<br><br>";
+                }
+                let details = `${extra}${doc.name}<br>${doc.email}<br>${doc.mobile}<br><br>${doc.address}<br>${doc.postnr} ${doc.poststed}`;
 
-                  this.events.push({
-                    name: name,
-                    start: start,
-                    end: end,
-                    color: this.colors[
-                      this.random(0, this.colors.length - 1)
-                    ].concat(
-                      this.shades[this.random(0, this.shades.length - 1)]
-                    ),
-                    details: details,
-                    bookingTimes: doc.bookingTimes,
-                    id: docId,
-                    day: this.weekdays[getDay(date) - 1]
-                  });
+                this.events.push({
+                  name: name,
+                  start: start,
+                  end: end,
+                  color: this.colors[
+                    this.random(0, this.colors.length - 1)
+                  ].concat(this.shades[this.random(0, this.shades.length - 1)]),
+                  details: details,
+                  bookingTimes: doc.bookingTimes,
+                  id: docId,
+                  day: this.weekdays[getDay(date) - 1]
                 });
               });
-          }
+            });
         }
       }
     }
@@ -325,13 +321,6 @@ export default {
   },
 
   created() {
-    if (!this.$store.state.details.path) {
-      this.$store.commit("updateSiteDetails", {
-        ...this.$store.state.details,
-        path: "/" + this.fbPrefix
-      });
-    }
-
     if (this.$vuetify.breakpoint.xs) {
       this.type = "day";
     } else if (this.$vuetify.breakpoint.sm) {
@@ -348,7 +337,10 @@ export default {
           let earliestOpening, latestClosing;
           for (let day in doc.data()) {
             let currentDay = doc.data()[day];
-            if (currentDay.start && currentDay.end) {
+            if (
+              typeof currentDay.start == "number" &&
+              typeof currentDay.end == "number"
+            ) {
               // dynamic calendar hours
               if (!earliestOpening) {
                 earliestOpening = currentDay.start;
@@ -356,14 +348,18 @@ export default {
                 earliestOpening = currentDay.start;
               }
               if (!latestClosing) {
-                latestClosing = currentDay.start;
+                latestClosing = currentDay.end;
               } else if (latestClosing < currentDay.end) {
                 latestClosing = currentDay.end;
               }
             }
           }
-          this.earliestOpening = earliestOpening;
-          this.latestClosing = latestClosing;
+          if (typeof earliestOpening == "number") {
+            this.earliestOpening = earliestOpening;
+          }
+          if (typeof latestClosing == "number") {
+            this.latestClosing = latestClosing;
+          }
         }
       });
   },

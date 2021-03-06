@@ -142,12 +142,11 @@ export default {
     },
     servicesDuration() {
       let length = 0;
-      let checked = this.checked;
-      if (checked) {
-        for (let i in checked) {
-          length += parseInt(checked[i].minutes);
-        }
+      let services = this.$store.state.services;
+      for (let item of this.checked) {
+        length += parseInt(services[item].duration);
       }
+
       return length;
     },
     weekStart() {

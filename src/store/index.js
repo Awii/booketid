@@ -7,10 +7,12 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
-    details: {},
     step: 1,
+    checked: [],
+    details: {
+      maxWidth: "700px"
+    },
     services: null,
-    checked: null,
     bookingTime: null,
     servicesDuration: null,
     success: null,
@@ -40,6 +42,10 @@ export default new Vuex.Store({
     },
     updateSnackbar(state, payload) {
       state.snackbar = payload;
+    },
+    resetState(state) {
+      state.step = 1;
+      state.checked = [];
     }
   },
   actions: {

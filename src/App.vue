@@ -6,6 +6,12 @@
 
 <script>
 export default {
-  name: "App"
+  name: "App",
+
+  watch: {
+    $route() {
+      this.$store.commit("resetState");
+    }
+  }
 };
 </script>
