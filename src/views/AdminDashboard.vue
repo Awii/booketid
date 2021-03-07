@@ -9,7 +9,7 @@
             <v-icon>mdi-chevron-left</v-icon>
           </v-btn>
           <v-toolbar-title
-            v-if="$refs.calendar && $vuetify.breakpoint.smAndUp"
+            v-if="$refs.calendar && $vuetify.breakpoint.mdAndUp"
             class="pl-2 pr-6"
           >
             {{ $refs.calendar.title | capitalize }}
@@ -43,7 +43,7 @@
         </v-col>
       </v-row>
       <v-toolbar-title
-        v-if="$refs.calendar && $vuetify.breakpoint.xsOnly"
+        v-if="$refs.calendar && $vuetify.breakpoint.smAndDown"
         class="pl-2 pr-6"
       >
         {{ $refs.calendar.title | capitalize }}
