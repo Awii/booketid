@@ -1,6 +1,7 @@
 <template>
   <v-container fluid fill-height>
     <AppHeader />
+    <AppDrawer />
     <v-row class="justify-center align-center mx-0">
       <v-col cols="12" style="max-width: 600px">
         <v-card class="elevation-8">
@@ -56,12 +57,14 @@
 
 <script>
 import AppHeader from "@/components/AppHeader";
+import AppDrawer from "@/components/AppDrawer";
 
 export default {
   name: "AdminLogin",
 
   components: {
-    AppHeader
+    AppHeader,
+    AppDrawer
   },
 
   data() {

@@ -1,6 +1,7 @@
 <template>
   <v-container fluid fill-height>
-    <AppHeader :title="title" :maxWidth="maxWidth" />
+    <AppHeader />
+    <AppDrawer />
     <v-main>
       <v-row justify="center" class="mt-0">
         <v-col style="max-width: 1200px" class="d-flex align-center">
@@ -99,6 +100,7 @@
 
 <script>
 import AppHeader from "@/components/AppHeader";
+import AppDrawer from "@/components/AppDrawer";
 import { db, auth } from "@/plugins/firebaseInit";
 import users from "@/users.js";
 import firebase from "firebase/app";
@@ -116,7 +118,8 @@ export default {
   name: "AdminDashboard",
 
   components: {
-    AppHeader
+    AppHeader,
+    AppDrawer
   },
 
   data() {

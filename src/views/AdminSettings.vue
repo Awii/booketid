@@ -1,6 +1,7 @@
 <template>
   <v-container fluid v-bind="smAndUp">
-    <AppHeader :title="title" :maxWidth="maxWidth" />
+    <AppHeader />
+    <AppDrawer />
 
     <v-main>
       <v-row justify="center" class="mt-0">
@@ -19,13 +20,26 @@
               >
                 <template v-slot:activator="{ on, attrs }">
                   <v-btn
+                    v-if="$vuetify.breakpoint.smAndUp"
                     color="primary darken-1"
                     dark
                     v-bind="attrs"
                     v-on="on"
-                    class="d-flex mr-1 mt-1"
+                    class="mr-1 mt-1"
                   >
                     Ny tjeneste
+                  </v-btn>
+                  <v-btn
+                    v-else
+                    color="primary darken-1"
+                    fab
+                    small
+                    v-bind="attrs"
+                    v-on="on"
+                    elevation="0"
+                    class="mt-2 mr-3"
+                  >
+                    <v-icon>mdi-plus</v-icon>
                   </v-btn>
                 </template>
                 <v-card>
@@ -235,6 +249,7 @@
 
 <script>
 import AppHeader from "@/components/AppHeader";
+import AppDrawer from "@/components/AppDrawer";
 import { db, auth } from "@/plugins/firebaseInit";
 import users from "@/users.js";
 
@@ -242,7 +257,8 @@ export default {
   name: "AdminSettings",
 
   components: {
-    AppHeader
+    AppHeader,
+    AppDrawer
   },
 
   data() {

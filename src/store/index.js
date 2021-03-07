@@ -16,7 +16,8 @@ export default new Vuex.Store({
     bookingTime: null,
     servicesDuration: null,
     success: null,
-    snackbar: false
+    snackbar: false,
+    drawer: false
   },
   mutations: {
     updateSiteDetails(state, payload) {
@@ -46,6 +47,9 @@ export default new Vuex.Store({
     resetState(state) {
       state.step = 1;
       state.checked = [];
+    },
+    updateDrawer(state, payload) {
+      state.drawer = payload;
     }
   },
   actions: {

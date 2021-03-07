@@ -1,6 +1,7 @@
 <template>
   <v-container fluid>
     <AppHeader :title="data.title" />
+    <AppDrawer />
 
     <v-main>
       <AppStepper />
@@ -15,6 +16,7 @@
 
 <script>
 import AppHeader from "@/components/AppHeader";
+import AppDrawer from "@/components/AppDrawer";
 import AppFooter from "@/components/AppFooter";
 import AppStepper from "@/components/AppStepper";
 import { db } from "@/plugins/firebaseInit";
@@ -24,6 +26,7 @@ export default {
 
   components: {
     AppHeader,
+    AppDrawer,
     AppFooter,
     AppStepper
   },

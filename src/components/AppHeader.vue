@@ -7,7 +7,13 @@
     elevation="0"
     style="border-bottom: 1px solid rgba(0,0,0,0.12) !important"
   >
-    <v-container class="px-0 px-sm-3">
+    <template v-if="this.$vuetify.breakpoint.smAndDown">
+      <v-toolbar-title>
+        {{ siteTitle }}
+      </v-toolbar-title>
+      <v-spacer></v-spacer>
+    </template>
+    <v-container class="px-0 px-sm-3" v-if="this.$vuetify.breakpoint.mdAndUp">
       <v-row align="center" class="flex-nowrap" no-gutters>
         <v-col v-if="$vuetify.breakpoint.smAndUp" class="mr-2">
           <v-toolbar-title>
@@ -49,6 +55,12 @@
         </v-col>
       </v-row>
     </v-container>
+
+    <v-app-bar-nav-icon
+      @click.stop="drawer = true"
+      v-if="this.$vuetify.breakpoint.smAndDown"
+    >
+    </v-app-bar-nav-icon>
   </v-app-bar>
 </template>
 
@@ -65,6 +77,14 @@ export default {
   },
 
   computed: {
+    drawer: {
+      get() {
+        return this.$store.state.drawer;
+      },
+      set(val) {
+        this.$store.commit("updateDrawer", val);
+      }
+    },
     sitePath() {
       if (auth.currentUser) {
         return "/" + users[auth.currentUser.uid].fbPrefix;

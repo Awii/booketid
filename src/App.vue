@@ -14,6 +14,7 @@ export default {
       handler(to) {
         document.title = to.meta.title || "Booketid";
         this.$store.commit("resetState");
+        this.$store.commit("updateDrawer", false);
       }
     }
   }
