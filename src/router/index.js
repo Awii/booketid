@@ -47,7 +47,10 @@ for (let site of sites) {
     name: site.name,
     props: site,
     component: () =>
-      import(/* webpackChunkName: "[request]" */ "../views/sites/Default.vue")
+      import(/* webpackChunkName: "[request]" */ "../views/sites/Default.vue"),
+    meta: {
+      title: `Booketid - ${site.name}`
+    }
   });
 }
 

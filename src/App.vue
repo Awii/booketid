@@ -9,8 +9,12 @@ export default {
   name: "App",
 
   watch: {
-    $route() {
-      this.$store.commit("resetState");
+    $route: {
+      immediate: true,
+      handler(to) {
+        document.title = to.meta.title || "Booketid";
+        this.$store.commit("resetState");
+      }
     }
   }
 };
