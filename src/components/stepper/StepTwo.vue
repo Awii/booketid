@@ -40,14 +40,14 @@
       justify="center"
     >
       <v-col
-        v-for="(hourArray, key, index) in available"
-        :key="key"
+        v-for="(hourArray, day, index) in available"
+        :key="day"
         class="d-flex flex-column align-center grey lighten-4 grey--text text--darken-3 py-1 px-1"
-        :class="[key != 'sunday' ? 'mr-1' : '']"
+        :class="[day != 'sunday' ? 'mr-1' : '']"
         style="max-width: 12.8%"
         :style="[
-          key == 'monday' ? { 'border-radius': '8px 0px 0px 8px' } : '',
-          key == 'sunday' ? { 'border-radius': '0px 8px 8px 0px' } : ''
+          day == 'monday' ? { 'border-radius': '8px 0px 0px 8px' } : '',
+          day == 'sunday' ? { 'border-radius': '0px 8px 8px 0px' } : ''
         ]"
       >
         <div
@@ -87,6 +87,14 @@
         >{{ errorMsg }}</span
       >
     </div>
+    <div v-else class="d-flex justify-center align-center py-16">
+      <v-progress-circular
+        :size="60"
+        :width="5"
+        color="success"
+        indeterminate
+      ></v-progress-circular>
+    </div>
   </v-stepper-content>
 </template>
 
@@ -100,7 +108,8 @@ import {
   getISOWeek,
   getMonth,
   getYear,
-  startOfWeek
+  startOfWeek,
+  getISODay
 } from "date-fns";
 
 export default {
@@ -206,41 +215,69 @@ export default {
         .collection(`${this.$store.state.details.fbPrefix}_hours`)
         .doc(ISOdate);
 
+      let weekDays = [
+        "monday",
+        "tuesday",
+        "wednesday",
+        "thursday",
+        "friday",
+        "saturday",
+        "sunday"
+      ];
+
       weekRef.get().then(weekDoc => {
         defRef.get().then(defDoc => {
           for (let day in defDoc.data()) {
-            let hoursArray = [];
-            let start = defDoc.data()[day].start;
-            let end = defDoc.data()[day].end;
-            let duration = this.servicesDuration / 60;
-            let intervalsRequired = Math.ceil(duration / this.hourlyIncrement);
-
-            for (
-              let hour = start;
-              hour <= end - this.hourlyIncrement * intervalsRequired;
-              hour += this.hourlyIncrement
+            // don't load past days from current week
+            if (
+              !(
+                getISOWeek(this.selectedWeek) == getISOWeek(this.currentWeek) &&
+                getISODay(new Date()) > weekDays.indexOf(day)
+              )
             ) {
-              if (!weekDoc.data()) {
-                hoursArray.push(hour);
-              } else {
-                let eligibleStart = true;
-                // check if future intervals not taken as well
-                for (let i = 0; i < intervalsRequired; i++) {
-                  if (
-                    weekDoc.data()[day] &&
-                    weekDoc
-                      .data()
-                      [day].includes(hour + i * this.hourlyIncrement)
-                  ) {
-                    eligibleStart = false;
+              let hoursArray = [];
+              let start = defDoc.data()[day].start;
+              let end = defDoc.data()[day].end;
+              let duration = this.servicesDuration / 60;
+              let intervalsRequired = Math.ceil(
+                duration / this.hourlyIncrement
+              );
+
+              for (
+                let hour = start;
+                hour <= end - this.hourlyIncrement * intervalsRequired;
+                hour += this.hourlyIncrement
+              ) {
+                if (!weekDoc.data()) {
+                  hoursArray.push(hour);
+                } else {
+                  let eligibleStart = true;
+                  // check if future intervals not taken as well
+                  for (let i = 0; i < intervalsRequired; i++) {
+                    if (
+                      weekDoc.data()[day] &&
+                      weekDoc
+                        .data()
+                        [day].includes(hour + i * this.hourlyIncrement)
+                    ) {
+                      eligibleStart = false;
+                    }
+                  }
+                  if (eligibleStart) {
+                    hoursArray.push(hour);
                   }
                 }
-                if (eligibleStart) {
-                  hoursArray.push(hour);
-                }
+                this.available[day] = hoursArray;
               }
-              this.available[day] = hoursArray;
             }
+          }
+          // if no available hours
+          if (
+            Object.entries(this.available) /* day, hours array */
+              .map(e => e[1].length) /* hours array length */
+              .every(e => e == 0) /* empty week */
+          ) {
+            this.showErrorMsg = true;
           }
           this.loaded = true;
         });

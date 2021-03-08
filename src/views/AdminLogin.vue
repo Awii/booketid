@@ -29,11 +29,11 @@
                 :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
                 :rules="[
                   value => !!value || 'Passord er påkrevd',
-                  v => v.length >= 8 || 'Minst 8 tegn'
+                  v => v.length >= 7 || 'Minst 7 tegn'
                 ]"
                 :type="showPassword ? 'text' : 'password'"
                 label="Passord"
-                hint="Minst 8 tegn"
+                hint="Minst 7 tegn"
                 counter
                 @click:append="showPassword = !showPassword"
                 validate-on-blur

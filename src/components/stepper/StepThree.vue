@@ -29,7 +29,7 @@
               :rules="[
                 v => !!v || 'Mobilnummer er påkrevd',
                 v =>
-                  (/^\+?\d+$/.test(v) && v.length <= 12) || // 0047{nr}, +47{nr}, {nr}
+                  (/^\+?\d+$/.test(v) && v.length <= 12 && v.length >= 8) || // +47{nr}, {nr}
                   'Mobilnummer må være gyldig'
               ]"
               label="Mobilnummer"
