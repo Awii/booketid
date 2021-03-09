@@ -106,7 +106,7 @@
                         : 'font-weight-bold text-subtitle-2'
                     ]"
                   >
-                    {{ item.service }}
+                    {{ services[item].service }}
                   </td>
                   <td
                     :class="[
@@ -115,13 +115,13 @@
                         : 'font-weight-bold text-subtitle-2'
                     ]"
                   >
-                    {{ item.price }}<small> kr</small>
+                    {{ services[item].price }}<small> kr</small>
                   </td>
                 </tr>
                 <tr v-if="checked.length > 1">
                   <th class="text-subtitle-2 font-weight-bold">Totalt</th>
                   <th class="text-subtitle-2 font-weight-bold">
-                    {{ sum }}<small> kr</small>
+                    {{ servicesPrice }}<small> kr</small>
                   </th>
                 </tr>
               </tbody>
@@ -195,8 +195,6 @@ export default {
 
   data() {
     return {
-      checked: [],
-
       valid: true,
       name: "",
       email: "",
@@ -213,7 +211,6 @@ export default {
     validate() {
       if (this.$refs.form.validate()) {
         this.$store.commit("updateStep", 4);
-        // circular
 
         let weekDays = [
           "monday",
@@ -299,6 +296,19 @@ export default {
     }
   },
   computed: {
+    checked() {
+      return this.$store.state.checked;
+    },
+    services() {
+      return this.$store.state.services;
+    },
+    servicesPrice() {
+      let val = 0;
+      for (let i of this.checked) {
+        val += parseInt(this.$store.state.services[i].price);
+      }
+      return val;
+    },
     step() {
       return this.$store.state.stepper;
     },

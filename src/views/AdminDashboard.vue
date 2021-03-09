@@ -302,7 +302,7 @@ export default {
           .doc(this.ISOdate)
           .set(
             {
-              monday: firebase.firestore.FieldValue.arrayRemove(
+              [event.day]: firebase.firestore.FieldValue.arrayRemove(
                 ...event.bookingTimes
               )
             },

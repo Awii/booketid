@@ -47,11 +47,7 @@
         >
           {{ details.steps[2] }}
         </v-stepper-step>
-        <StepThree
-          :step="3"
-          :location="details.location"
-          :hourlyIncrement="details.hourlyIncrement"
-        />
+        <StepThree :step="3" />
 
         <v-stepper-step
           v-if="$vuetify.breakpoint.xsOnly"
